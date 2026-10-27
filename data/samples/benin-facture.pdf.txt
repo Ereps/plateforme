@@ -1,0 +1,4 @@
+%PDF-1.4
+% Document texte simulant un PDF de facture (fictif)
+Facture n° 2026-0042 — PME Fictive SAS — Montant : 1 240,00 EUR
+%%EOF

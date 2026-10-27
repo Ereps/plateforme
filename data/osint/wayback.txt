@@ -1,0 +1,8 @@
+Wayback Machine — captures de http://dev-old.pme-fictive.example/ (extrait)
+2021-09-14  Index of /  — backup/ (pme-fictive-site-2021.tar.gz, 48 Mo), admin/ (phpMyAdmin 4.9), old-site/
+2023-01-02  Index of /  — identique
+2025-04-30  Index of /  — identique
+
+Captures de https://www.pme-fictive.example/equipe.html
+2022-05-10  quatre personnes (dont « Paul Martin, responsable informatique, paul.martin@pme-fictive.example »)
+2024-09-03  trois personnes (Thomas Lefebvre remplace Paul Martin)

@@ -1,0 +1,8 @@
+.env
+out/*
+!out/.gitkeep
+data/cowrie/cowrie.json*
+data/cowrie/*.log*
+*.pyc
+__pycache__/
+.ipynb_checkpoints/

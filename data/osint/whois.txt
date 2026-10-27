@@ -1,0 +1,8 @@
+domain:      pme-fictive.example
+registrar:   Registrar Fictif SAS
+created:     2014-03-18
+expires:     2027-03-18
+nserver:     ns1.registrar-fictif.example
+nserver:     ns2.registrar-fictif.example
+holder:      PME FICTIVE SAS (données de contact masquées, RGPD)
+tech-c:      TL123-FICTIF (Thomas Lefebvre)

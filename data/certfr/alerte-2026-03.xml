@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<item>
+  <title>CERTFR-2026-ALE-011 : Vulnérabilités dans Orchestra CMS exploitées activement (fictif, exercice IT320)</title>
+  <link>https://www.cert.ssi.gouv.fr/alerte/CERTFR-2026-ALE-011/</link>
+  <pubDate>2026-03-05T10:00:00+01:00</pubDate>
+  <description>
+    Le 4 mars 2026, la fondation Orchestra a publié un correctif pour trois vulnérabilités affectant Orchestra CMS versions 5.x
+    antérieures à 5.8.2 : CVE-2026-30501 (injection SQL non authentifiée dans le module de recherche), CVE-2026-30502
+    (téléversement de fichier arbitraire par un utilisateur authentifié) et CVE-2026-30503 (élévation de privilèges). La combinaison
+    de CVE-2026-30501 et CVE-2026-30502 est exploitée activement pour déposer des webshells sur des sites exposés (T1190).
+
+    Le CERT-FR a identifié l'adresse 203.0.113.9 à l'origine de la majorité des tentatives et le domaine cms-cdn-static.example
+    utilisé pour héberger les scripts de seconde étape. Deux webshells ont été observés : SHA-256 f09639983d914fd7d8787158ac401d3ed125efc96b920001a279e8d8e4882659 et
+    e7b6f15990b279b54526ed3e229125130b737cc6122921941069d75cc32d0262.
+
+    Le CERT-FR recommande la mise à jour immédiate vers la version 5.8.2, la vérification de l'intégrité des répertoires
+    de téléversement et la rotation des identifiants de base de données. Diffusion : TLP:CLEAR.
+  </description>
+</item>

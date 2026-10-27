@@ -1,0 +1,6 @@
+; dig pme-fictive.example ANY (extrait)
+pme-fictive.example.	3600	IN	A	203.0.113.10
+pme-fictive.example.	3600	IN	MX	10 mail.pme-fictive.example.
+pme-fictive.example.	3600	IN	TXT	"v=spf1 mx ip4:203.0.113.11 include:spf.protection.outlook.com -all"
+pme-fictive.example.	3600	IN	NS	ns1.registrar-fictif.example.
+_dmarc.pme-fictive.example.	3600	IN	TXT	"v=DMARC1; p=none; rua=mailto:postmaster@pme-fictive.example"

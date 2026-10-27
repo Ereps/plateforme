@@ -1,0 +1,32 @@
+title: PowerShell encodé lancé depuis une application Office (exemple IT320)
+id: 3f1c2a4e-9b7d-4c2e-8f7a-1d2e3f4a5b6c
+status: experimental
+description: Détecte un PowerShell avec commande encodée et fenêtre cachée dont le parent est une application Office, typique d'une macro malveillante.
+references:
+  - https://attack.mitre.org/techniques/T1059/001/
+author: IT320 (exemple enseignant)
+date: 2026-09-14
+tags:
+  - attack.execution
+  - attack.t1059.001
+  - attack.initial_access
+  - attack.t1566.001
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection_ps:
+    Image|endswith: '\powershell.exe'
+    CommandLine|contains|all:
+      - '-enc'
+      - 'hidden'
+  selection_parent:
+    ParentImage|endswith:
+      - '\WINWORD.EXE'
+      - '\EXCEL.EXE'
+      - '\POWERPNT.EXE'
+      - '\OUTLOOK.EXE'
+  condition: selection_ps and selection_parent
+falsepositives:
+  - Rares macros d'entreprise légitimes lançant PowerShell encodé (à documenter)
+level: high

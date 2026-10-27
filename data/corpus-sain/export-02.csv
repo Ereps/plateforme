@@ -1,0 +1,12 @@
+date;poste;utilisateur;commande
+2026-03-19;PC-039;user32;v2.3
+2026-03-18;PC-017;user18;HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+2026-03-17;PC-052;user14;build 0417
+2026-03-01;PC-026;user34;powershell.exe
+2026-03-07;PC-034;user33;Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+2026-03-15;PC-058;user33;build 0417
+2026-03-01;PC-034;user1;Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+2026-03-22;PC-028;user8;This program cannot be run in DOS mode.
+2026-03-14;PC-021;user19;cmd.exe /c
+2026-03-07;PC-032;user19;build 0417
+2026-03-08;PC-047;user20;cmd.exe /c

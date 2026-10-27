@@ -1,0 +1,4 @@
+git log --oneline (extrait)
+a41c2f0 2026-06-03 T. Lefebvre  fix export encoding
+9b7e1d4 2025-11-18 T. Lefebvre  add RDP host to config example
+3c0f8aa 2025-02-07 T. Lefebvre  initial commit (clé API en dur, à corriger)

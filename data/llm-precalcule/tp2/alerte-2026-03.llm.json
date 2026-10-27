@@ -1,0 +1,45 @@
+{
+  "summary": "La fondation Orchestra a corrigé le 4 mars 2026 trois vulnérabilités d'Orchestra CMS 5.x antérieures à 5.8.2, dont une injection SQL et un téléversement de fichier exploités ensemble pour déposer des webshells. Le CERT-FR recommande la mise à jour immédiate et la vérification des répertoires de téléversement.",
+  "products": [
+    "Orchestra CMS versions 5.x antérieures à 5.8.2"
+  ],
+  "cve": [
+    "CVE-2026-30501",
+    "CVE-2026-30502"
+  ],
+  "ioc": [
+    {
+      "type": "ip",
+      "value": "203.0.113.9"
+    },
+    {
+      "type": "domain",
+      "value": "cms-cdn-static.example"
+    },
+    {
+      "type": "sha256",
+      "value": "f09639983d914fd7d8787158ac401d3ed125efc96b920001a279e8d8e4882659"
+    },
+    {
+      "type": "sha256",
+      "value": "e7b6f15990b279b54526ed3e229125130b737cc6122921941069d75cc32d0262"
+    }
+  ],
+  "attack_tactics": [
+    "TA0001",
+    "TA0003"
+  ],
+  "attack_techniques": [
+    {
+      "id": "T1190",
+      "name": "Exploit Public-Facing Application"
+    },
+    {
+      "id": "T1505.003",
+      "name": "Web Shell"
+    }
+  ],
+  "tlp": "clear",
+  "severity": "high",
+  "suspicious_instructions": []
+}

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<item>
+  <title>CERTFR-2026-ALE-007 : Campagne d'hameçonnage ciblant des PME françaises via des documents BureauPlus piégés (fictif, exercice IT320)</title>
+  <link>https://www.cert.ssi.gouv.fr/alerte/CERTFR-2026-ALE-007/</link>
+  <pubDate>2026-02-20T10:00:00+01:00</pubDate>
+  <description>
+    Depuis le 10 février 2026, le CERT-FR observe une campagne de courriels d'hameçonnage à destination de PME françaises, notamment
+    du secteur industriel. Les messages, rédigés en français et usurpant un fournisseur, contiennent une pièce jointe au format
+    .bpx (BureauPlus Suite) exploitant la vulnérabilité CVE-2026-20417 de BureauPlus Suite 2024 et 2025 (technique MITRE ATT&CK
+    T1566.001). L'ouverture du document déclenche une commande PowerShell encodée en base64 avec fenêtre cachée (T1059.001) qui
+    télécharge une charge de seconde étape.
+
+    Indicateurs associés : le domaine facture-securisee.example héberge les charges ; l'adresse 192.0.2.88 sert de serveur de
+    commande et de contrôle ; l'empreinte SHA-256 du document piégé observé est cbf440e5bb3d7fdc1621f705baf532125eaa5b81faf6f2674607c4d138af8dce ; celle de la charge
+    de seconde étape est b78955ebb5f25cfa652fdade5d70e794fcec784004f17a05aba0941bca35d35e.
+
+    L'éditeur a publié le correctif 2025.2.1. Le CERT-FR recommande de bloquer les indicateurs, de désactiver l'exécution de
+    macros BureauPlus provenant d'Internet et de rechercher les exécutions de powershell.exe avec l'argument -enc dans les journaux
+    des postes. Diffusion : TLP:CLEAR.
+  </description>
+</item>

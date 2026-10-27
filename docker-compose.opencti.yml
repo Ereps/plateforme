@@ -1,0 +1,181 @@
+# OpenCTI pour le TP 4 — à lancer SUR LA VM DU GROUPE (4 vCPU, 8 Go de RAM, 50 Go de disque), pas sur un poste de salle.
+# Dérivé du dépôt officiel OpenCTI-Platform/docker ; versions à vérifier avant la séance (docs.opencti.io).
+#   docker compose -f docker-compose.opencti.yml up -d
+# Premier démarrage : 10 à 15 minutes (OpenSearch, migrations, connecteurs). Le lancer en début de séance, pendant le cours.
+# Interface : http://<vm>:8080 — compte OPENCTI_ADMIN_EMAIL / OPENCTI_ADMIN_PASSWORD (.env)
+#
+# PRÉREQUIS SUR LA VM (OpenSearch refuse de démarrer sinon, et opencti reste « unhealthy ») :
+#   sudo sysctl -w vm.max_map_count=262144
+#   echo 'vm.max_map_count=262144' | sudo tee /etc/sysctl.d/99-opensearch.conf    # persistant après redémarrage
+#
+# Version : dernière branche 6.x ; OpenCTI 7 (fév. 2026) change la configuration (APP__ENCRYPTION_KEY, xtm-composer,
+# Elasticsearch) : ne pas mélanger. OPENCTI_VERSION doit être identique pour la plateforme, le worker et les connecteurs.
+
+services:
+  redis:
+    image: redis:7.2-alpine
+    restart: unless-stopped
+    volumes:
+      - octi_redis:/data
+
+  opensearch:
+    image: opensearchproject/opensearch:2.17.1
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - OPENSEARCH_JAVA_OPTS=-Xms${OPENSEARCH_MEMORY:-2g} -Xmx${OPENSEARCH_MEMORY:-2g}
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    volumes:
+      - octi_search:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -q -E 'green|yellow'"]
+      interval: 15s
+      timeout: 10s
+      retries: 40
+
+  minio:
+    image: minio/minio:RELEASE.2024-08-17T01-24-54Z
+    restart: unless-stopped
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - octi_s3:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - octi_amqp:/var/lib/rabbitmq
+
+  opencti:
+    image: opencti/platform:${OPENCTI_VERSION:-6.9.29}
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      NODE_OPTIONS: --max-old-space-size=4096
+      APP__PORT: 8080
+      APP__BASE_URL: ${OPENCTI_BASE_URL:-http://localhost:8080}
+      APP__ADMIN__EMAIL: ${OPENCTI_ADMIN_EMAIL}
+      APP__ADMIN__PASSWORD: ${OPENCTI_ADMIN_PASSWORD}
+      APP__ADMIN__TOKEN: ${OPENCTI_ADMIN_TOKEN}
+      APP__HEALTH_ACCESS_KEY: ${OPENCTI_HEALTHCHECK_ACCESS_KEY}
+      APP__APP_LOGS__LOGS_LEVEL: error
+      REDIS__HOSTNAME: redis
+      REDIS__PORT: 6379
+      ELASTICSEARCH__URL: http://opensearch:9200
+      ELASTICSEARCH__ENGINE_SELECTOR: opensearch
+      MINIO__ENDPOINT: minio
+      MINIO__PORT: 9000
+      MINIO__USE_SSL: "false"
+      MINIO__ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO__SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      RABBITMQ__HOSTNAME: rabbitmq
+      RABBITMQ__PORT: 5672
+      RABBITMQ__PORT_MANAGEMENT: 15672
+      RABBITMQ__MANAGEMENT_SSL: "false"
+      RABBITMQ__USERNAME: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ__PASSWORD: ${RABBITMQ_DEFAULT_PASS}
+      SMTP__HOSTNAME: localhost
+      SMTP__PORT: 25
+      PROVIDERS__LOCAL__STRATEGY: LocalStrategy
+    depends_on:
+      opensearch:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      redis:
+        condition: service_started
+    healthcheck:
+      # L'image platform ne contient que wget (pas curl) ; la clé doit être la même que APP__HEALTH_ACCESS_KEY.
+      test: ["CMD-SHELL", "wget -qO- \"http://localhost:8080/health?health_access_key=${OPENCTI_HEALTHCHECK_ACCESS_KEY}\" || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 30
+      start_period: 300s
+
+  worker:
+    # Image dédiée du worker (son propre entrypoint) : ne pas réutiliser opencti/platform avec une commande python.
+    image: opencti/worker:${OPENCTI_VERSION:-6.9.29}
+    restart: unless-stopped
+    environment:
+      OPENCTI_URL: http://opencti:8080
+      OPENCTI_TOKEN: ${OPENCTI_ADMIN_TOKEN}
+      WORKER_LOG_LEVEL: info
+    depends_on:
+      opencti:
+        condition: service_healthy
+    deploy:
+      mode: replicated
+      replicas: 2
+
+  # Connecteur MITRE ATT&CK : peuple la base de connaissances (techniques, groupes, logiciels) — indispensable pour l'exercice
+  connector-mitre:
+    image: opencti/connector-mitre:${OPENCTI_VERSION:-6.9.29}
+    restart: unless-stopped
+    environment:
+      OPENCTI_URL: http://opencti:8080
+      OPENCTI_TOKEN: ${OPENCTI_ADMIN_TOKEN}
+      CONNECTOR_ID: ${CONNECTOR_MITRE_ID}
+      CONNECTOR_NAME: "MITRE Datasets"
+      CONNECTOR_SCOPE: "tool,report,malware,identity,campaign,intrusion-set,attack-pattern,course-of-action,x-mitre-data-source,x-mitre-data-component,x-mitre-matrix,x-mitre-tactic,x-mitre-collection"
+      CONNECTOR_RUN_AND_TERMINATE: "false"
+      CONNECTOR_LOG_LEVEL: error
+      MITRE_REMOVE_STATEMENT_MARKING: "true"
+      MITRE_INTERVAL: 7
+    depends_on:
+      opencti:
+        condition: service_healthy
+
+  # Connecteur MISP : importe les événements du MISP DU GROUPE dans OpenCTI (le pont entre les deux plateformes du module)
+  connector-misp:
+    image: opencti/connector-misp:${OPENCTI_VERSION:-6.9.29}
+    restart: unless-stopped
+    environment:
+      OPENCTI_URL: http://opencti:8080
+      OPENCTI_TOKEN: ${OPENCTI_ADMIN_TOKEN}
+      CONNECTOR_ID: ${CONNECTOR_MISP_ID}
+      CONNECTOR_NAME: "MISP du groupe"
+      CONNECTOR_SCOPE: misp
+      CONNECTOR_LOG_LEVEL: error
+      MISP_URL: ${MISP_BASEURL_FROM_VM}
+      MISP_REFERENCE_URL: ${MISP_BASEURL_FROM_VM}
+      MISP_KEY: ${MISP_API_KEY}
+      MISP_SSL_VERIFY: "false"
+      MISP_DATETIME_ATTRIBUTE: timestamp
+      MISP_CREATE_REPORTS: "true"
+      MISP_REPORT_TYPE: misp-event
+      MISP_CREATE_INDICATORS: "true"
+      MISP_CREATE_OBSERVABLES: "true"
+      MISP_CREATE_OBJECT_OBSERVABLES: "true"
+      MISP_IMPORT_FROM_DATE: "2024-01-01"
+      MISP_IMPORT_TAGS: "tlp:green,tlp:amber,source:honeypot,source:cert-fr"
+      # Période de collecte (ISO 8601) ; remplace l'ancien MISP_INTERVAL (minutes) des connecteurs < 6.4
+      CONNECTOR_DURATION_PERIOD: PT5M
+      # MISP_INTERVAL: 5   # legacy, conservé pour mémoire
+    depends_on:
+      opencti:
+        condition: service_healthy
+
+volumes:
+  octi_redis:
+  octi_search:
+  octi_s3:
+  octi_amqp:

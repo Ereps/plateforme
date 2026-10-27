@@ -1,0 +1,6 @@
+www.pme-fictive.example
+extranet.pme-fictive.example
+mail.pme-fictive.example
+autodiscover.pme-fictive.example
+dev-old.pme-fictive.example
+vpn.pme-fictive.example

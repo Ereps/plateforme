@@ -1,0 +1,6 @@
+www.pme-fictive.example [A] [203.0.113.10]
+extranet.pme-fictive.example [A] [203.0.113.10]
+mail.pme-fictive.example [A] [203.0.113.11]
+autodiscover.pme-fictive.example [CNAME] [mail.pme-fictive.example]
+dev-old.pme-fictive.example [A] [198.51.100.7]
+# vpn.pme-fictive.example : NXDOMAIN (aucune résolution)

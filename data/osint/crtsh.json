@@ -1,0 +1,110 @@
+[
+ {
+  "issuer_ca_id": 295815,
+  "issuer_name": "C=US, O=Let's Encrypt, CN=R11",
+  "common_name": "www.pme-fictive.example",
+  "name_value": "www.pme-fictive.example",
+  "id": 11854416613,
+  "entry_timestamp": "2026-09-10T00:00:00",
+  "not_before": "2026-09-10T00:00:00",
+  "not_after": "2026-12-09T00:00:00",
+  "serial_number": "8306d03bf38b2ffc80a4df5a51c9bc70",
+  "result_count": 1
+ },
+ {
+  "issuer_ca_id": 295815,
+  "issuer_name": "C=US, O=Let's Encrypt, CN=R11",
+  "common_name": "extranet.pme-fictive.example",
+  "name_value": "extranet.pme-fictive.example",
+  "id": 11854532708,
+  "entry_timestamp": "2026-09-10T00:00:00",
+  "not_before": "2026-09-10T00:00:00",
+  "not_after": "2026-12-09T00:00:00",
+  "serial_number": "8e7aa6e99f19950499dd251de5121482",
+  "result_count": 1
+ },
+ {
+  "issuer_ca_id": 295815,
+  "issuer_name": "C=US, O=Let's Encrypt, CN=R11",
+  "common_name": "mail.pme-fictive.example",
+  "name_value": "mail.pme-fictive.example",
+  "id": 11854654181,
+  "entry_timestamp": "2026-08-26T00:00:00",
+  "not_before": "2026-08-26T00:00:00",
+  "not_after": "2026-11-24T00:00:00",
+  "serial_number": "70eb9a0a96263ae6c5e818fac0433cbd",
+  "result_count": 1
+ },
+ {
+  "issuer_ca_id": 295815,
+  "issuer_name": "C=US, O=Let's Encrypt, CN=R11",
+  "common_name": "autodiscover.pme-fictive.example",
+  "name_value": "autodiscover.pme-fictive.example",
+  "id": 11854686629,
+  "entry_timestamp": "2026-08-26T00:00:00",
+  "not_before": "2026-08-26T00:00:00",
+  "not_after": "2026-11-24T00:00:00",
+  "serial_number": "1c593af514aa4e719d3c7dec00a61f93",
+  "result_count": 1
+ },
+ {
+  "issuer_ca_id": 295815,
+  "issuer_name": "C=US, O=Let's Encrypt, CN=R11",
+  "common_name": "www.pme-fictive.example",
+  "name_value": "www.pme-fictive.example",
+  "id": 11854502442,
+  "entry_timestamp": "2026-06-12T00:00:00",
+  "not_before": "2026-06-12T00:00:00",
+  "not_after": "2026-09-10T00:00:00",
+  "serial_number": "e255accb1a466884f3f49249dc28ff90",
+  "result_count": 1
+ },
+ {
+  "issuer_ca_id": 295815,
+  "issuer_name": "C=US, O=Let's Encrypt, CN=R11",
+  "common_name": "extranet.pme-fictive.example",
+  "name_value": "extranet.pme-fictive.example",
+  "id": 11854588838,
+  "entry_timestamp": "2026-06-12T00:00:00",
+  "not_before": "2026-06-12T00:00:00",
+  "not_after": "2026-09-10T00:00:00",
+  "serial_number": "d7a7a3cc8c3d5f169293de8fc88b2875",
+  "result_count": 1
+ },
+ {
+  "issuer_ca_id": 295815,
+  "issuer_name": "C=US, O=Let's Encrypt, CN=R11",
+  "common_name": "www.pme-fictive.example",
+  "name_value": "www.pme-fictive.example",
+  "id": 11854824506,
+  "entry_timestamp": "2026-03-14T00:00:00",
+  "not_before": "2026-03-14T00:00:00",
+  "not_after": "2026-06-12T00:00:00",
+  "serial_number": "ede7bd0cffb88309fadb890859001ac9",
+  "result_count": 1
+ },
+ {
+  "issuer_ca_id": 295815,
+  "issuer_name": "C=US, O=Let's Encrypt, CN=R11",
+  "common_name": "dev-old.pme-fictive.example",
+  "name_value": "dev-old.pme-fictive.example",
+  "id": 11854725278,
+  "entry_timestamp": "2025-04-20T00:00:00",
+  "not_before": "2025-04-20T00:00:00",
+  "not_after": "2025-07-19T00:00:00",
+  "serial_number": "02f0ee99731c94521919e93ad11745ad",
+  "result_count": 1
+ },
+ {
+  "issuer_ca_id": 295815,
+  "issuer_name": "C=US, O=Let's Encrypt, CN=R11",
+  "common_name": "vpn.pme-fictive.example",
+  "name_value": "vpn.pme-fictive.example",
+  "id": 11854790540,
+  "entry_timestamp": "2024-11-19T00:00:00",
+  "not_before": "2024-11-19T00:00:00",
+  "not_after": "2025-02-17T00:00:00",
+  "serial_number": "65b00a2d35d148805071950eadec6f11",
+  "result_count": 1
+ }
+]

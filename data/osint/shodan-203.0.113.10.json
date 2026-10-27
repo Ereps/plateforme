@@ -1,0 +1,54 @@
+{
+ "ip_str": "203.0.113.10",
+ "org": "Hebergeur Fictif SAS",
+ "asn": "AS64496",
+ "country_code": "FR",
+ "city": "Bordeaux",
+ "last_update": "2026-10-14T00:00:00",
+ "hostnames": [
+  "www.pme-fictive.example",
+  "extranet.pme-fictive.example"
+ ],
+ "ports": [
+  443,
+  3389,
+  80
+ ],
+ "data": [
+  {
+   "port": 443,
+   "transport": "tcp",
+   "product": "nginx",
+   "version": "1.24.0",
+   "ssl": {
+    "cert": {
+     "subject": {
+      "CN": "www.pme-fictive.example"
+     }
+    }
+   },
+   "http": {
+    "title": "PME Fictive SAS - Usinage de précision",
+    "server": "nginx/1.24.0"
+   }
+  },
+  {
+   "port": 80,
+   "transport": "tcp",
+   "product": "nginx",
+   "version": "1.24.0",
+   "http": {
+    "title": "301 Moved Permanently",
+    "location": "https://www.pme-fictive.example/"
+   }
+  },
+  {
+   "port": 3389,
+   "transport": "tcp",
+   "product": "Remote Desktop Protocol",
+   "data": "Remote Desktop Protocol\nNTLM: Target_Name: EXTRANET\nNetBIOS_Computer_Name: EXTRANET-SRV\nProduct_Version: 10.0.14393 (Windows Server 2016)\n",
+   "os": "Windows Server 2016",
+   "vulns": []
+  }
+ ]
+}

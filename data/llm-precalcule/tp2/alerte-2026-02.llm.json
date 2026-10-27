@@ -1,0 +1,52 @@
+{
+  "summary": "Depuis le 10 février 2026, une campagne d'hameçonnage vise des PME françaises du secteur industriel avec des pièces jointes .bpx exploitant une vulnérabilité de BureauPlus Suite. L'ouverture lance une commande PowerShell encodée qui télécharge une seconde étape. Un correctif 2025.2.1 est disponible.",
+  "products": [
+    "BureauPlus Suite 2024 et 2025"
+  ],
+  "cve": [
+    "CVE-2026-20417"
+  ],
+  "ioc": [
+    {
+      "type": "domain",
+      "value": "facture-securisee.example"
+    },
+    {
+      "type": "ip",
+      "value": "192.0.2.88"
+    },
+    {
+      "type": "sha256",
+      "value": "cbf440e5bb3d7fdc1621f705baf532125eaa5b81faf6f2674607c4d138af8dce"
+    },
+    {
+      "type": "sha256",
+      "value": "b78955ebb5f25cfa652fdade5d70e794fcec784004f17a05aba0941bca35d35e"
+    },
+    {
+      "type": "url",
+      "value": "https://facture-securisee.example/charge.bpx"
+    }
+  ],
+  "attack_tactics": [
+    "TA0001",
+    "TA0002"
+  ],
+  "attack_techniques": [
+    {
+      "id": "T1566.001",
+      "name": "Spearphishing Attachment"
+    },
+    {
+      "id": "T1059.001",
+      "name": "PowerShell"
+    },
+    {
+      "id": "T1204.002",
+      "name": "Malicious File"
+    }
+  ],
+  "tlp": "clear",
+  "severity": "high",
+  "suspicious_instructions": []
+}

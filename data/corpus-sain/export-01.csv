@@ -1,0 +1,27 @@
+date;poste;utilisateur;commande
+2026-03-14;PC-055;user21;Global\
+2026-03-06;PC-044;user38;v2.3
+2026-03-28;PC-055;user7;This program cannot be run in DOS mode.
+2026-03-20;PC-024;user23;Global\
+2026-03-04;PC-031;user18;Software\Microsoft
+2026-03-11;PC-030;user9;v2.3
+2026-03-26;PC-038;user29;This program cannot be run in DOS mode.
+2026-03-10;PC-018;user12;Global\
+2026-03-18;PC-055;user2;HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+2026-03-05;PC-046;user24;Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+2026-03-28;PC-056;user35;cmd.exe /c
+2026-03-10;PC-020;user32;Global\
+2026-03-28;PC-016;user14;v2.3
+2026-03-01;PC-039;user17;build 0417
+2026-03-19;PC-044;user10;Global\
+2026-03-17;PC-022;user6;powershell.exe
+2026-03-04;PC-045;user7;Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+2026-03-20;PC-052;user32;HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+2026-03-21;PC-040;user20;Global\
+2026-03-27;PC-026;user6;build 0417
+2026-03-02;PC-008;user24;HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+2026-03-05;PC-059;user3;Global\
+2026-03-14;PC-042;user10;This program cannot be run in DOS mode.
+2026-03-22;PC-032;user15;Software\Microsoft
+2026-03-16;PC-014;user25;powershell.exe
+2026-03-02;PC-022;user40;v2.3

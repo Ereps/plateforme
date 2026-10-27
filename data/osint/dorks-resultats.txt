@@ -1,0 +1,18 @@
+Résultats figés (moteur de recherche, 20 octobre 2026)
+
+site:pme-fictive.example filetype:pdf
+  1. https://www.pme-fictive.example/plaquette.pdf — « Plaquette PME Fictive 2023 » (métadonnées : voir site/plaquette-metadonnees.txt)
+  2. https://www.pme-fictive.example/qualite/certificat-en9100.pdf — certificat EN 9100 (valide jusqu'en 2027)
+
+"pme-fictive.example" password
+  aucun résultat
+
+"pme-fictive" github
+  1. https://github.com/pme-fictive/outils-extranet — « Scripts d'export ERP vers l'extranet » (voir github-repo/)
+
+site:pme-fictive.example intitle:"index of"
+  1. http://dev-old.pme-fictive.example/ — « Index of / » (backup/, admin/, old-site/)
+
+"PME Fictive SAS" linkedin
+  1. Page entreprise : 118 abonnés, 43 salariés déclarés ; 3 publications en 2026 (nouvelle machine 5 axes, salon du Bourget, recrutement admin sys)
+  2. Profil « Thomas L. » — Responsable informatique chez PME Fictive SAS — « Fortinet NSE 4, Zimbra, Windows Server »

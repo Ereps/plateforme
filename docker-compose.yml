@@ -1,0 +1,194 @@
+# Plateforme IT320 — mini-CERT étudiant
+# MISP (core + nginx + modules + mariadb + valkey) · n8n · Cowrie · image d'outils OSINT
+# Ollama n'est PAS lancé ici : on utilise le serveur mutualisé (OLLAMA_URL dans .env).
+# Dérivé du dépôt officiel MISP/misp-docker (https://github.com/MISP/misp-docker) — à tester sur un poste de l'école avant la séance 2.
+#
+# Permissions : les conteneurs écrivent dans ./data/cowrie (Cowrie, uid 999) et ./out (n8n, uid 1000).
+# Avant le premier `up`, exécutez `tools/init-dirs.sh` (ou `mkdir -p data/cowrie out && chmod -R 777 data/cowrie out`),
+# sinon Cowrie ne démarre pas et les nœuds n8n « Journal » échouent avec EACCES.
+
+services:
+
+  misp-db:
+    image: mariadb:10.11
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: misp
+      MYSQL_USER: misp
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - misp_db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  misp-redis:
+    image: valkey/valkey:7.2
+    restart: unless-stopped
+    command: "--requirepass '${REDIS_PASSWORD}'"
+    healthcheck:
+      test: ["CMD-SHELL", "valkey-cli -a '${REDIS_PASSWORD}' ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  misp-modules:
+    image: ghcr.io/misp/misp-docker/misp-modules:latest
+    restart: unless-stopped
+    environment:
+      REDIS_BACKEND: misp-redis
+      REDIS_PW: ${REDIS_PASSWORD}
+    depends_on:
+      misp-redis:
+        condition: service_healthy
+
+  # Depuis 2026, misp-core ne contient plus de serveur web (PHP-FPM seul, port 9002) : l'interface et l'API passent par
+  # misp-nginx, qui n'a pas de certificat par défaut (créé une fois par misp-certs). Images épinglées : `latest` a déjà
+  # changé d'architecture sans prévenir ; vérifier https://github.com/MISP/misp-docker avant de monter de version.
+  misp-core:
+    image: ghcr.io/misp/misp-docker/misp-core:v2.5.50
+    restart: unless-stopped
+    depends_on:
+      misp-db:
+        condition: service_healthy
+      misp-redis:
+        condition: service_healthy
+    expose:
+      - "9002"
+      - "9003"
+    environment:
+      BASE_URL: ${MISP_BASEURL}
+      MYSQL_HOST: misp-db
+      MYSQL_USER: misp
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: misp
+      REDIS_HOST: misp-redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      ADMIN_EMAIL: ${MISP_ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${MISP_ADMIN_PASSWORD}
+      ADMIN_KEY: ${MISP_API_KEY}    # clé générée AVANT le premier `up` (voir .env.example) : elle est injectée à l'initialisation
+      ADMIN_ORG: ${MISP_ORG}
+      MISP_MODULES_FQDN: http://misp-modules
+      ENABLE_DB_SETTINGS: "false"
+    volumes:
+      - misp_configs:/var/www/MISP/app/Config/
+      - misp_logs:/var/www/MISP/app/tmp/logs/
+      - misp_files:/var/www/MISP/app/files/
+      - misp_gnupg:/var/www/MISP/.gnupg/
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/9002' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+
+  misp-certs:
+    # Tâche unique : certificat auto-signé pour misp-nginx au premier lancement, conservé ensuite dans le volume misp_ssl.
+    image: ghcr.io/misp/misp-docker/misp-nginx:v2.5.50
+    user: "0"
+    restart: "no"
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        [ -f /certs/cert.pem ] ||
+        openssl req -x509 -newkey rsa:2048 -nodes -days 825 -subj /CN=localhost
+        -addext subjectAltName=DNS:localhost,DNS:misp-nginx,IP:127.0.0.1
+        -keyout /certs/key.pem -out /certs/cert.pem 2>/dev/null;
+        chown 101:101 /certs/cert.pem /certs/key.pem
+    volumes:
+      - misp_ssl:/certs
+
+  misp-nginx:
+    image: ghcr.io/misp/misp-docker/misp-nginx:v2.5.50
+    restart: unless-stopped
+    depends_on:
+      misp-certs:
+        condition: service_completed_successfully
+      misp-core:
+        condition: service_healthy
+    ports:
+      - "8443:8443"
+    environment:
+      BASE_URL: ${MISP_BASEURL}
+      FASTCGI_LISTEN: misp-core:9002
+      FASTCGI_LISTEN_STATUS: misp-core:9003
+      NGINX_X_FORWARDED_FOR: "true"
+    volumes:
+      - misp_ssl:/etc/nginx/certs:ro
+    tmpfs:
+      - /etc/nginx/conf.d:mode=0755,uid=101,gid=101
+      - /var/cache/nginx:mode=0755,uid=101,gid=101
+      - /tmp:mode=1777
+    healthcheck:
+      test: ["CMD-SHELL", "curl -k -s -f -o /dev/null https://localhost:8443/users/heartbeat || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  n8n:
+    # Épingler une version 1.x testée ; n8n 2.x change les défauts des task runners
+    # (les nœuds Code n'ont plus accès à `require('fs')` ni à $env sans configuration supplémentaire).
+    image: n8nio/n8n:1.123.62
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      N8N_SECURE_COOKIE: "false"
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"   # permet $env.OLLAMA_URL etc. dans les nœuds
+      NODE_FUNCTION_ALLOW_BUILTIN: "*"
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"       # MISP local en auto-signé
+      GENERIC_TIMEZONE: Europe/Paris
+      TZ: Europe/Paris
+      OLLAMA_URL: ${OLLAMA_URL}
+      OLLAMA_MODEL: ${OLLAMA_MODEL}
+      MISP_URL: https://misp-nginx:8443
+      MISP_API_KEY: ${MISP_API_KEY}
+      WATCH_SECTOR: ${WATCH_SECTOR}
+      WATCH_COUNTRY: ${WATCH_COUNTRY}
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/workflows:/workflows:ro
+      - ./prompts:/prompts:ro
+      - ./data:/data:ro
+      - ./out:/out          # doit être inscriptible par l'uid 1000 (tools/init-dirs.sh)
+    depends_on:
+      - misp-nginx
+
+  cowrie:
+    image: cowrie/cowrie:latest
+    restart: unless-stopped
+    ports:
+      - "2222:2222"
+    volumes:
+      - ./data/cowrie:/cowrie/cowrie-git/var/log/cowrie   # doit être inscriptible par l'uid 999 (tools/init-dirs.sh)
+    # Le journal JSON apparaît dans ./data/cowrie/cowrie.json
+
+  osint-tools:
+    build: ./tools
+    image: it320/osint-tools
+    # Usage : docker compose --profile tools run --rm osint-tools theHarvester -d <domaine> -b crtsh
+    #         docker compose --profile tools run --rm osint-tools bash     (puis travailler dans /work)
+    environment:
+      MISP_URL: https://misp-nginx:8443  # nom du service sur le réseau Compose (pas localhost)
+      MISP_VERIFY_SSL: "false"           # certificat auto-signé
+    volumes:
+      - .:/work                          # dépôt complet : /work/tools, /work/rules, /work/data, /work/out
+      - ./data:/data
+      - ./rules:/rules
+      - ./out:/out
+    working_dir: /work
+    env_file: .env
+    profiles: ["tools"]   # ne démarre pas avec `up`, seulement à la demande
+
+volumes:
+  misp_db:
+  misp_configs:
+  misp_logs:
+  misp_files:
+  misp_ssl:
+  misp_gnupg:
+  n8n_data:

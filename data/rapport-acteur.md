@@ -1,0 +1,80 @@
+# SILEX-7 : un affilié ransomware opportuniste ciblant les PME industrielles françaises
+
+Rapport d'analyse — IT320 (acteur et outil FICTIFS, rédigés pour l'exercice ; toute ressemblance avec un groupe réel serait fortuite)
+Référence : IT320-TR-2026-03 · Date : 2026-03-18 · TLP:CLEAR · Auteur : cellule CTI fictive « CERT-Exemple »
+
+## 1. Résumé
+
+SILEX-7 est le nom donné par CERT-Exemple à un groupe d'affiliés observé depuis octobre 2025 dans au moins onze intrusions
+suivies de chiffrement. Le groupe n'opère pas son propre ransomware : il loue successivement des charges de chiffrement à
+plusieurs programmes RaaS et se distingue surtout par son outil d'accès initial maison, LoaderX, et par une chaîne
+d'attaque courte (médiane : quatre jours entre le premier courriel et le chiffrement). Les victimes sont très majoritairement
+des PME françaises de l'industrie manufacturière (sous-traitance mécanique, plasturgie, agroalimentaire) comptant entre 20 et
+250 salariés, dont l'informatique est souvent infogérée. Les rançons demandées sont modestes (80 000 à 400 000 euros), ce qui
+suggère un modèle fondé sur le volume plutôt que sur quelques grandes cibles.
+
+## 2. Victimologie
+
+- Pays : France (9 cas sur 11), Belgique (1), Suisse romande (1). Les leurres sont rédigés dans un français correct.
+- Secteur : industrie manufacturière (8 cas), logistique (2), BTP (1).
+- Taille : PME de 20 à 250 salariés, Active Directory à plat, sauvegardes accessibles depuis le domaine dans 7 cas sur 11.
+- Point d'entrée : courriel d'hameçonnage ciblé usurpant un client ou un fournisseur (facture, appel d'offres, bon de commande).
+
+## 3. Chaîne d'attaque et techniques ATT&CK
+
+1. Accès initial — T1566.001 (Phishing : Spearphishing Attachment). Le courriel contient une archive ZIP protégée par mot de passe
+   (indiqué dans le corps du message) renfermant un document Word avec macro ou un fichier .lnk.
+2. Exécution — T1204.002 (User Execution : Malicious File) puis T1059.001 (PowerShell). La macro lance
+   `powershell.exe -nop -w hidden -enc <base64>` ; la commande décodée télécharge LoaderX depuis silex-update.example.
+3. Persistance — LoaderX inscrit la clé de registre HKCU\Software\Microsoft\Windows\CurrentVersion\Run\SvcHostUpdater pointant vers une copie de lui-même dans %APPDATA%.
+4. Découverte et mouvement latéral — T1047 (Windows Management Instrumentation) pour l'exécution distante
+   (`wmic /node:<hôte> process call create`) et T1021.001 (Remote Desktop Protocol) avec des comptes d'administration
+   obtenus par vol d'identifiants en mémoire.
+5. Exfiltration — T1567.002 (Exfiltration to Cloud Storage). Un binaire rclone renommé `svchost64.exe` synchronise les
+   partages de fichiers vers un stockage objet ; le trafic sort vers cdn-metrics-sync.example (203.0.113.77).
+6. Impact — T1490 (Inhibit System Recovery) : `vssadmin.exe delete shadows /all /quiet` puis `wbadmin delete catalog -quiet` ;
+   T1486 (Data Encrypted for Impact) : déploiement de la charge de chiffrement par GPO ou par PsExec.
+
+## 4. L'outil LoaderX
+
+LoaderX est un chargeur de 20 à 40 Ko, écrit en C, compilé pour x64 (fichier PE). Il récupère une charge de seconde étape
+chiffrée, la déchiffre en mémoire et l'exécute. Caractéristiques observées sur les trois échantillons analysés :
+
+- Chaîne de version en clair : `LoaderX v2.3 build 0417` ; chemin de compilation : `C:\dev\loaderx\Release\ldx.pdb`.
+- Mutex d'instance unique : `Global\SilexMutex_7A2F`.
+- User-Agent des requêtes HTTP : `Mozilla/5.0 (Windows NT 10.0; Win64; x64) SLX7/2.3` (le suffixe `SLX7/2.3` est propre à l'outil).
+- Chaîne UTF-16 (wide) utilisée comme nom de la section mémoire de la charge : `SilexStage2Payload`.
+- Clé de persistance : `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\SvcHostUpdater`.
+- Domaines de téléchargement et de C2 : silex-update.example, cdn-metrics-sync.example ; adresses observées : 203.0.113.77, 198.51.100.23.
+
+## 5. Indicateurs de compromission
+
+| Type | Valeur | Commentaire |
+|---|---|---|
+| sha256 | 4a40e42c6e880884906a6629e9077950d0c76c31566c351b0ebe4ef177ef94b6 | LoaderX v2.3 (échantillon inerte fourni : data/samples/loaderx-sample.bin) |
+| sha256 | e2fa6d7d5f7fb9cdf6da75e743e46335b017cf0ca925ee70a723170222738df4 | document Word piégé (dropper) |
+| sha256 | ce4e403d6a434c66be9a9768ddfeaed916d25f01fd5d80f96358c76d811b9270 | rclone renommé svchost64.exe |
+| domain | silex-update.example | téléchargement de LoaderX |
+| domain | cdn-metrics-sync.example | C2 et exfiltration |
+| ip-dst | 203.0.113.77 | résout cdn-metrics-sync.example |
+| ip-dst | 198.51.100.23 | serveur RDP relais |
+| mutex | Global\SilexMutex_7A2F | instance unique LoaderX |
+| user-agent | Mozilla/5.0 (Windows NT 10.0; Win64; x64) SLX7/2.3 | requêtes HTTP de LoaderX |
+| regkey | HKCU\Software\Microsoft\Windows\CurrentVersion\Run\SvcHostUpdater | persistance |
+
+## 6. Opportunités de détection
+
+- Fichier : les chaînes `Global\SilexMutex_7A2F`, `SLX7/2.3` et `SilexStage2Payload` (UTF-16) sont stables sur les trois
+  échantillons ; combinées à l'en-tête PE, elles font une règle YARA à faible taux de faux positifs. Le User-Agent complet est
+  moins durable (le préfixe Mozilla/5.0 est générique).
+- Hôte (Sysmon EventID 1) : powershell.exe avec `-enc` et `-w hidden` dont le parent est WINWORD.EXE ou EXCEL.EXE ;
+  vssadmin.exe avec `delete shadows` ; création de processus par WmiPrvSE.exe ; rclone renommé (hash d'original `rclone.exe`
+  dans OriginalFileName).
+- Réseau : requêtes HTTP sortantes avec le suffixe `SLX7/` dans le User-Agent ; résolution des domaines ci-dessus.
+- Authentification : connexions RDP (type 10) vers de nombreux hôtes depuis un même compte en dehors des heures ouvrées.
+- Comportements difficiles à exprimer en une sélection Sigma simple : la rafale d'authentifications (nécessite un comptage
+  dans le SIEM) ; préférez pour l'exercice les détections ponctuelles ci-dessus.
+
+## 7. Annexe — mapping ATT&CK de l'éditeur
+
+T1566.001 · T1204.002 · T1059.001 · T1047 · T1021.001 · T1567.002 · T1490 · T1486

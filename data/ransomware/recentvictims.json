@@ -1,0 +1,362 @@
+[
+ {
+  "victim": "Atelier Girondin de Mécanique",
+  "group": "akira",
+  "country": "FR",
+  "activity": "Manufacturing",
+  "discovered": "2026-10-25T13:36:10.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/fba9d881"
+ },
+ {
+  "victim": "Escuela Técnica",
+  "group": "ransomhub",
+  "country": "SE",
+  "activity": "Logistics",
+  "discovered": "2026-10-25T09:48:42.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/a87ff679"
+ },
+ {
+  "victim": "Escuela Técnica",
+  "group": "qilin",
+  "country": "DE",
+  "activity": "Healthcare",
+  "discovered": "2026-10-25T07:38:59.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/c16a5320"
+ },
+ {
+  "victim": "Hudson Freight Inc",
+  "group": "ransomhub",
+  "country": "IT",
+  "activity": "Manufacturing",
+  "discovered": "2026-10-25T09:13:26.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/aab32389"
+ },
+ {
+  "victim": "Hudson Freight Inc",
+  "group": "ransomhub",
+  "country": "SE",
+  "activity": "Healthcare",
+  "discovered": "2026-10-24T23:26:02.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/182be0c5"
+ },
+ {
+  "victim": "Clinique du Parc",
+  "group": "akira",
+  "country": "ES",
+  "activity": "Logistics",
+  "discovered": "2026-10-25T03:18:30.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/6364d3f0"
+ },
+ {
+  "victim": "Nordic Tools AB",
+  "group": "akira",
+  "country": "SE",
+  "activity": "Manufacturing",
+  "discovered": "2026-10-24T21:40:43.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/2387337b"
+ },
+ {
+  "victim": "Clinique du Parc",
+  "group": "lockbit3",
+  "country": "SE",
+  "activity": "Healthcare",
+  "discovered": "2026-10-25T20:20:05.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/3c59dc04"
+ },
+ {
+  "victim": "Tessile Veneto SRL",
+  "group": "lockbit3",
+  "country": "FR",
+  "activity": "Manufacturing",
+  "discovered": "2026-10-25T13:58:08.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/8f14e45f"
+ },
+ {
+  "victim": "Clinique du Parc",
+  "group": "akira",
+  "country": "FR",
+  "activity": "Education",
+  "discovered": "2026-10-25T10:45:30.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/e4da3b7f"
+ },
+ {
+  "victim": "Groupe Hôtelier Atlantique",
+  "group": "ransomhub",
+  "country": "DE",
+  "activity": "Logistics",
+  "discovered": "2026-10-25T15:26:38.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/6ea9ab1b"
+ },
+ {
+  "victim": "Lycée Privé Saint-Exemple",
+  "group": "play",
+  "country": "IT",
+  "activity": "Healthcare",
+  "discovered": "2026-10-25T08:13:32.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/1679091c"
+ },
+ {
+  "victim": "Nordic Tools AB",
+  "group": "blackbasta",
+  "country": "ES",
+  "activity": "Manufacturing",
+  "discovered": "2026-10-25T16:05:01.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/33e75ff0"
+ },
+ {
+  "victim": "Bayerische Metall GmbH",
+  "group": "blackbasta",
+  "country": "ES",
+  "activity": "Education",
+  "discovered": "2026-10-25T12:41:25.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/8e296a06"
+ },
+ {
+  "victim": "Mediterranea Logistics",
+  "group": "play",
+  "country": "ES",
+  "activity": "Manufacturing",
+  "discovered": "2026-10-24T22:24:13.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/34173cb3"
+ },
+ {
+  "victim": "Lycée Privé Saint-Exemple",
+  "group": "blackbasta",
+  "country": "FR",
+  "activity": "Hospitality",
+  "discovered": "2026-10-25T01:31:27.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/37693cfc"
+ },
+ {
+  "victim": "Clinique du Parc",
+  "group": "qilin",
+  "country": "IT",
+  "activity": "Logistics",
+  "discovered": "2026-10-24T21:09:24.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/4e732ced"
+ },
+ {
+  "victim": "Groupe Hôtelier Atlantique",
+  "group": "akira",
+  "country": "DE",
+  "activity": "Manufacturing",
+  "discovered": "2026-10-24T22:53:52.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/b6d767d2"
+ },
+ {
+  "victim": "Escuela Técnica",
+  "group": "akira",
+  "country": "FR",
+  "activity": "Education",
+  "discovered": "2026-10-25T19:18:06.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/e369853d"
+ },
+ {
+  "victim": "Clinique du Parc",
+  "group": "ransomhub",
+  "country": "IT",
+  "activity": "Healthcare",
+  "discovered": "2026-10-25T01:42:01.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/1f0e3dad"
+ },
+ {
+  "victim": "Ohio Valley Plastics",
+  "group": "qilin",
+  "country": "US",
+  "activity": "Healthcare",
+  "discovered": "2026-10-25T12:14:37.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/1ff1de77"
+ },
+ {
+  "victim": "Groupe Hôtelier Atlantique",
+  "group": "lockbit3",
+  "country": "IT",
+  "activity": "Hospitality",
+  "discovered": "2026-10-25T20:38:28.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/c74d97b0"
+ },
+ {
+  "victim": "Groupe Hôtelier Atlantique",
+  "group": "lockbit3",
+  "country": "IT",
+  "activity": "Education",
+  "discovered": "2026-10-25T16:04:58.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/c81e728d"
+ },
+ {
+  "victim": "Groupe Hôtelier Atlantique",
+  "group": "play",
+  "country": "SE",
+  "activity": "Healthcare",
+  "discovered": "2026-10-25T09:47:50.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/70efdf2e"
+ },
+ {
+  "victim": "Tessile Veneto SRL",
+  "group": "lockbit3",
+  "country": "SE",
+  "activity": "Logistics",
+  "discovered": "2026-10-25T06:18:02.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/02e74f10"
+ },
+ {
+  "victim": "Tessile Veneto SRL",
+  "group": "blackbasta",
+  "country": "ES",
+  "activity": "Manufacturing",
+  "discovered": "2026-10-25T10:53:19.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/98f13708"
+ },
+ {
+  "victim": "Forges de Lorraine SA",
+  "group": "ransomhub",
+  "country": "FR",
+  "activity": "Manufacturing",
+  "discovered": "2026-10-25T17:02:55.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/fed33392"
+ },
+ {
+  "victim": "Hudson Freight Inc",
+  "group": "akira",
+  "country": "FR",
+  "activity": "Healthcare",
+  "discovered": "2026-10-24T22:20:37.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/9bf31c7f"
+ },
+ {
+  "victim": "Ohio Valley Plastics",
+  "group": "akira",
+  "country": "FR",
+  "activity": "Healthcare",
+  "discovered": "2026-10-25T14:45:25.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/c9f0f895"
+ },
+ {
+  "victim": "Bayerische Metall GmbH",
+  "group": "qilin",
+  "country": "DE",
+  "activity": "Hospitality",
+  "discovered": "2026-10-25T04:21:44.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/c51ce410"
+ },
+ {
+  "victim": "PME Fictive SAS",
+  "group": "qilin",
+  "country": "FR",
+  "activity": "Manufacturing",
+  "discovered": "2026-10-25T10:42:19.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/b8c37e33"
+ },
+ {
+  "victim": "Mediterranea Logistics",
+  "group": "lockbit3",
+  "country": "US",
+  "activity": "Education",
+  "discovered": "2026-10-25T08:22:27.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/45c48cce"
+ },
+ {
+  "victim": "Nordic Tools AB",
+  "group": "akira",
+  "country": "DE",
+  "activity": "Manufacturing",
+  "discovered": "2026-10-25T09:20:56.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/c20ad4d7"
+ },
+ {
+  "victim": "Logistique du Sud-Ouest",
+  "group": "play",
+  "country": "FR",
+  "activity": "Logistics",
+  "discovered": "2026-10-25T10:37:19.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/aa68c75c"
+ },
+ {
+  "victim": "Mediterranea Logistics",
+  "group": "qilin",
+  "country": "SE",
+  "activity": "Logistics",
+  "discovered": "2026-10-25T12:01:07.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/6512bd43"
+ },
+ {
+  "victim": "Tessile Veneto SRL",
+  "group": "lockbit3",
+  "country": "FR",
+  "activity": "Hospitality",
+  "discovered": "2026-10-25T09:52:07.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/c4ca4238"
+ },
+ {
+  "victim": "Mediterranea Logistics",
+  "group": "qilin",
+  "country": "DE",
+  "activity": "Logistics",
+  "discovered": "2026-10-25T03:19:13.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/cfcd2084"
+ },
+ {
+  "victim": "Lycée Privé Saint-Exemple",
+  "group": "qilin",
+  "country": "ES",
+  "activity": "Education",
+  "discovered": "2026-10-25T12:53:40.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/6f4922f4"
+ },
+ {
+  "victim": "Clinique du Parc",
+  "group": "akira",
+  "country": "FR",
+  "activity": "Education",
+  "discovered": "2026-10-25T02:50:52.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/eccbc87e"
+ },
+ {
+  "victim": "Tessile Veneto SRL",
+  "group": "lockbit3",
+  "country": "IT",
+  "activity": "Manufacturing",
+  "discovered": "2026-10-25T17:31:53.062419Z",
+  "description": "Exemple figé pour le TP 4 (données fictives).",
+  "post_url": "http://exemple.onion/post/d3d94468"
+ }
+]

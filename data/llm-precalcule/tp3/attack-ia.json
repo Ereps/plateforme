@@ -1,0 +1,58 @@
+{
+  "techniques": [
+    {
+      "id": "T1566.001",
+      "name": "Spearphishing Attachment",
+      "evidence": "pièce jointe piégée"
+    },
+    {
+      "id": "T1204.002",
+      "name": "Malicious File",
+      "evidence": "ouverture par l'utilisateur"
+    },
+    {
+      "id": "T1059.001",
+      "name": "PowerShell",
+      "evidence": "commande encodée"
+    },
+    {
+      "id": "T1047",
+      "name": "Windows Management Instrumentation",
+      "evidence": "exécution via WMI"
+    },
+    {
+      "id": "T1021.001",
+      "name": "Remote Desktop Protocol",
+      "evidence": "mouvement latéral RDP"
+    },
+    {
+      "id": "T1486",
+      "name": "Data Encrypted for Impact",
+      "evidence": "chiffrement"
+    },
+    {
+      "id": "T1490",
+      "name": "Inhibit System Recovery",
+      "evidence": "vssadmin delete shadows"
+    },
+    {
+      "id": "T1567.002",
+      "name": "Exfiltration to Cloud Storage",
+      "evidence": "rclone vers un stockage cloud"
+    },
+    {
+      "id": "T1003.001",
+      "name": "LSASS Memory",
+      "evidence": "vol d'identifiants (non décrit explicitement)"
+    },
+    {
+      "id": "T1071.001",
+      "name": "Web Protocols",
+      "evidence": "User-Agent HTTP"
+    }
+  ],
+  "unmapped": [],
+  "hors_liste": [
+    "T1071.001"
+  ]
+}

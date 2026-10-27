@@ -1,0 +1,19 @@
+*******************************************************************
+* theHarvester 4.11.1 (sortie figée, sources : certspotter, crtsh, duckduckgo, hackertarget)
+*******************************************************************
+[*] Target: pme-fictive.example
+
+[*] Emails found: 4
+---------------------
+contact@pme-fictive.example
+karim.benali@pme-fictive.example
+marie.durand@pme-fictive.example
+thomas.lefebvre@pme-fictive.example
+
+[*] Hosts found: 5
+---------------------
+autodiscover.pme-fictive.example:203.0.113.11
+dev-old.pme-fictive.example:198.51.100.7
+extranet.pme-fictive.example:203.0.113.10
+mail.pme-fictive.example:203.0.113.11
+www.pme-fictive.example:203.0.113.10

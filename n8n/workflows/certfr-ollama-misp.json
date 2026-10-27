@@ -1,0 +1,378 @@
+{
+  "name": "IT320 - CERT-FR -> Ollama -> MISP",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "name": "Cron (toutes les heures)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "name": "Exécution manuelle (TP)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://www.cert.ssi.gouv.fr/alerte/feed/",
+        "options": {}
+      },
+      "name": "RSS CERT-FR (alertes)",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.1,
+      "position": [
+        260,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// TP : remplace le RSS par les 3 alertes figées de /data/certfr.\n// L'alerte piégée (alerte-piegee*.xml, exercice B4) est EXCLUE par défaut : passez INCLURE_PIEGEE à true\n// (ou lancez le workflow depuis le déclencheur « Exécution manuelle (B4 injection) ») pour l'inclure.\nconst fs = require('fs');\nconst dir = '/data/certfr/';\nconst INCLURE_PIEGEE = false;\nconst viaB4 = $prevNode && $prevNode.name === 'Exécution manuelle (B4 injection)';\nconst inclurePiegee = INCLURE_PIEGEE || viaB4;\nconst items = [];\nfor (const f of fs.readdirSync(dir).filter(n => n.endsWith('.xml') || n.endsWith('.txt')).sort()) {\n  if (f.startsWith('alerte-piegee') && !inclurePiegee) continue;\n  const content = fs.readFileSync(dir + f, 'utf8');\n  items.push({ json: { title: f, link: 'file://' + dir + f, content, isoDate: new Date().toISOString() } });\n}\nreturn items;"
+      },
+      "name": "Lecture fichiers test",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Ne traite que les alertes jamais vues (mémoire persistante du workflow).\n// Attention : $getWorkflowStaticData n'est PERSISTÉ que pour les exécutions déclenchées (Cron) d'un workflow actif ;\n// en exécution manuelle (bouton « Test workflow »), la mémoire repart vide à chaque lancement — pratique pour le TP.\nconst seen = $getWorkflowStaticData('global');\nseen.links = seen.links || [];\nconst out = [];\nfor (const item of $input.all()) {\n  const key = item.json.link || item.json.title;\n  if (!seen.links.includes(key)) { seen.links.push(key); out.push(item); }\n}\nif (seen.links.length > 500) seen.links = seen.links.slice(-500);\nreturn out;"
+      },
+      "name": "Filtre nouveautés",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Construit le prompt à partir du gabarit versionné dans /prompts.\nconst fs = require('fs');\nconst template = fs.readFileSync('/prompts/extraction-certfr.md', 'utf8');\nreturn $input.all().map(item => {\n  const text = (item.json.content || item.json.contentSnippet || item.json.title || '').toString().slice(0, 12000);\n  return { json: { ...item.json, source_text: text, prompt: template.replace('{{TEXTE}}', text) } };\n});"
+      },
+      "name": "Préparer le prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.OLLAMA_URL }}/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: $env.OLLAMA_MODEL, prompt: $json.prompt, format: 'json', stream: false, options: { temperature: 0, num_ctx: 8192 } }) }}",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "name": "Ollama /api/generate",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validation : schéma + littéralité (chaque IoC/CVE doit apparaître dans le texte source).\n// C'est ICI que se joue la défense contre l'hallucination et une partie de celle contre l'injection.\n// Nœud en mode « Run Once for All Items » : on retrouve l'item source par son index avec itemMatching(i),\n// jamais avec .item (qui ne désigne que l'item courant en mode « Run Once for Each Item »).\nconst out = [];\nfor (const [i, item] of $input.all().entries()) {\n  const src = $('Préparer le prompt').itemMatching(i).json;\n  const text = (src.source_text || '').toLowerCase();\n  let parsed;\n  try { parsed = JSON.parse(item.json.response); } catch (e) {\n    out.push({ json: { rejected: true, reason: 'JSON invalide', raw: item.json.response, title: src.title } });\n    continue;\n  }\n  const allowedTlp = ['clear', 'green', 'amber', 'amber+strict', 'red'];\n  const cves = (parsed.cve || []).filter(c => /^CVE-\\d{4}-\\d{4,}$/i.test(c) && text.includes(c.toLowerCase()));\n  const iocs = (parsed.ioc || []).filter(i => i && i.value && text.includes(String(i.value).toLowerCase()));\n  const dropped = { cve: (parsed.cve || []).length - cves.length, ioc: (parsed.ioc || []).length - iocs.length };\n  const tlp = allowedTlp.includes(String(parsed.tlp || '').toLowerCase()) ? String(parsed.tlp).toLowerCase() : 'amber';\n  const attack = (parsed.attack_tactics || []).filter(t => /^TA\\d{4}$/.test(t));\n  // Techniques (T1234 / T1234.001) : objets {id, name} ou simples identifiants, selon le prompt.\n  const techniques = (parsed.attack_techniques || []).map(t => (typeof t === 'string' ? { id: t } : t))\n    .filter(t => t && /^T\\d{4}(\\.\\d{3})?$/.test(String(t.id || '')));\n  out.push({ json: {\n    rejected: false, title: src.title, link: src.link,\n    summary: String(parsed.summary || '').slice(0, 1000),\n    products: (parsed.products || []).slice(0, 20),\n    cve: cves, ioc: iocs, attack_tactics: attack, attack_techniques: techniques, tlp,\n    dropped, latency_ms: Math.round((item.json.total_duration || 0) / 1e6),\n    model: item.json.model\n  } });\n}\nreturn out;"
+      },
+      "name": "Valider (schéma + littéralité)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.rejected }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "false"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "Valide ?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Construit l'événement MISP. Le tag workflow:ia-non-verifie est obligatoire.\n// Catégories MISP : hash -> Payload delivery ; CVE -> External analysis ; IP/domaine/URL -> Network activity.\nconst TYPE_MAP = { ip: 'ip-dst', domain: 'domain', hostname: 'hostname', url: 'url', md5: 'md5', sha1: 'sha1', sha256: 'sha256', email: 'email-src' };\nconst CATEGORY = { md5: 'Payload delivery', sha1: 'Payload delivery', sha256: 'Payload delivery', 'email-src': 'Payload delivery',\n                   vulnerability: 'External analysis', 'ip-dst': 'Network activity', domain: 'Network activity',\n                   hostname: 'Network activity', url: 'Network activity' };\n// Tags ATT&CK : galaxie MISP seulement si on a un nom (\"Nom - T1234\") ; sinon tag simple attack:T1234 ;\n// les tactiques (TAxxxx) n'ont pas de galaxie attack-pattern : tag simple attack-tactic:TAxxxx.\nfunction attackTag(id, name) {\n  id = String(id).toUpperCase();\n  if (id.startsWith('TA')) return 'attack-tactic:' + id;\n  if (name) return 'misp-galaxy:mitre-attack-pattern=\"' + name + ' - ' + id + '\"';\n  return 'attack:' + id;\n}\nreturn $input.all().map(item => {\n  const j = item.json;\n  const attrs = [];\n  for (const c of j.cve) attrs.push({ type: 'vulnerability', category: CATEGORY.vulnerability, value: c, to_ids: false });\n  for (const i of j.ioc) {\n    const t = TYPE_MAP[String(i.type || '').toLowerCase()];\n    if (t) attrs.push({ type: t, category: CATEGORY[t] || 'Network activity', value: i.value, to_ids: false, comment: 'extrait par LLM - a verifier' });\n  }\n  for (const p of j.products) attrs.push({ type: 'text', category: 'Other', value: 'Produit: ' + p, to_ids: false });\n  attrs.push({ type: 'link', category: 'External analysis', value: j.link || 'n/a', to_ids: false });\n  attrs.push({ type: 'comment', category: 'Other', value: j.summary, to_ids: false });\n  const tags = [ { name: 'tlp:' + j.tlp }, { name: 'workflow:ia-non-verifie' }, { name: 'source:cert-fr' } ];\n  for (const t of (j.attack_tactics || [])) tags.push({ name: attackTag(t) });\n  for (const t of (j.attack_techniques || [])) tags.push({ name: attackTag(t.id, t.name) });\n  return { json: { Event: { info: '[CERT-FR] ' + j.title, distribution: 0, threat_level_id: 2, analysis: 0, Attribute: attrs, Tag: tags } , meta: j } };\n});"
+      },
+      "name": "Construire l'événement MISP",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1820,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.MISP_URL }}/events/add",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $env.MISP_API_KEY }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ Event: $json.Event }) }}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "name": "MISP /events/add",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2080,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Journal des rejets et des mesures, pour le livrable eval-extraction.md\n// Mode « Run Once for All Items » : on itère sur $input.all() (et non sur $json, qui ne vaut que pour le premier item).\nconst fs = require('fs');\nfor (const item of $input.all()) {\n  const line = JSON.stringify({ ts: new Date().toISOString(), ...item.json }) + '\\n';\n  fs.appendFileSync('/out/certfr-rejets.jsonl', line);\n}\nreturn $input.all();"
+      },
+      "name": "Journal des rejets",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1820,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Mesures par alerte (latence, nb CVE/IoC retenus et écartés, id MISP) pour le livrable eval-extraction.md.\nconst fs = require('fs');\nfor (const [i, item] of $input.all().entries()) {\n  const m = $('Construire l\\'événement MISP').itemMatching(i).json.meta;\n  fs.appendFileSync('/out/certfr-mesures.jsonl', JSON.stringify({ ts: new Date().toISOString(), title: m.title, model: m.model, latency_ms: m.latency_ms, n_cve: m.cve.length, n_ioc: m.ioc.length, dropped: m.dropped, tlp: m.tlp, misp_event_id: item.json.Event ? item.json.Event.id : null }) + '\\n');\n}\nreturn $input.all();"
+      },
+      "name": "Journal des mesures",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2340,
+        300
+      ]
+    },
+    {
+      "parameters": {},
+      "name": "Exécution manuelle (B4 injection)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        700
+      ],
+      "notes": "Déclencheur du test d'injection (TP 2, B4) : la lecture des fichiers inclut alors alerte-piegee.xml."
+    }
+  ],
+  "connections": {
+    "Cron (toutes les heures)": {
+      "main": [
+        [
+          {
+            "node": "RSS CERT-FR (alertes)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exécution manuelle (TP)": {
+      "main": [
+        [
+          {
+            "node": "Lecture fichiers test",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS CERT-FR (alertes)": {
+      "main": [
+        [
+          {
+            "node": "Filtre nouveautés",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lecture fichiers test": {
+      "main": [
+        [
+          {
+            "node": "Filtre nouveautés",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtre nouveautés": {
+      "main": [
+        [
+          {
+            "node": "Préparer le prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Préparer le prompt": {
+      "main": [
+        [
+          {
+            "node": "Ollama /api/generate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama /api/generate": {
+      "main": [
+        [
+          {
+            "node": "Valider (schéma + littéralité)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valider (schéma + littéralité)": {
+      "main": [
+        [
+          {
+            "node": "Valide ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valide ?": {
+      "main": [
+        [
+          {
+            "node": "Construire l'événement MISP",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Journal des rejets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Construire l'événement MISP": {
+      "main": [
+        [
+          {
+            "node": "MISP /events/add",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MISP /events/add": {
+      "main": [
+        [
+          {
+            "node": "Journal des mesures",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exécution manuelle (B4 injection)": {
+      "main": [
+        [
+          {
+            "node": "Lecture fichiers test",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": [
+    {
+      "name": "IT320"
+    }
+  ]
+}

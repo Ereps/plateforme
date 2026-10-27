@@ -1,0 +1,222 @@
+{
+  "name": "IT320 - Rapport acteur -> Ollama -> règles YARA / Sigma / ATT&CK",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Exécution manuelle (TP 3)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lit le rapport acteur et les trois gabarits de prompt versionnés dans /prompts, puis assemble les prompts.\n// Un seul item en sortie (le rapport tient dans num_ctx = 8192 tokens : ~800 mots) ; pour un rapport plus long,\n// découper ici en morceaux et produire un item par morceau.\nconst fs = require('fs');\nconst rapport = fs.readFileSync('/data/rapport-acteur.txt', 'utf8');\nconst candidats = fs.readFileSync('/prompts/candidats-attack.txt', 'utf8');\nconst texte = rapport.slice(0, 24000);\n// Nom de l'acteur : première ligne du rapport, avant « : » (SILEX-7 pour le rapport fil rouge), nettoyé pour servir de nom de fichier.\nconst acteur = (rapport.split('\\n')[0].split(':')[0].trim() || 'acteur').toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '');\nconst lire = f => fs.readFileSync('/prompts/' + f, 'utf8');\nconst remplir = t => t.replace('{{TEXTE}}', texte).replace('{{CANDIDATS}}', candidats.trim());\nreturn [{ json: {\n  acteur,\n  prompt_yara: remplir(lire('gen-yara.md')),\n  prompt_sigma: remplir(lire('gen-sigma.md')),\n  prompt_attack: remplir(lire('map-attack.md')),\n  longueur_rapport: rapport.length\n} }];"
+      },
+      "name": "Lire le rapport",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.OLLAMA_URL }}/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: $env.OLLAMA_MODEL, prompt: $json.prompt_yara, stream: false, options: { temperature: 0, num_ctx: 8192 } }) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "name": "Ollama YARA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        200
+      ],
+      "notes": "PAS de format: 'json' : la règle doit sortir en texte brut (YARA / YAML)."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.OLLAMA_URL }}/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: $env.OLLAMA_MODEL, prompt: $json.prompt_sigma, stream: false, options: { temperature: 0, num_ctx: 8192 } }) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "name": "Ollama Sigma",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        400
+      ],
+      "notes": "PAS de format: 'json' : la règle doit sortir en texte brut (YARA / YAML)."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.OLLAMA_URL }}/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: $env.OLLAMA_MODEL, prompt: $json.prompt_attack, format: 'json', stream: false, options: { temperature: 0, num_ctx: 8192 } }) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "name": "Ollama ATT&CK",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        600
+      ],
+      "notes": "format: 'json' force une sortie JSON (mapping ATT&CK)."
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "name": "Attendre les 3 réponses",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        780,
+        400
+      ],
+      "notes": "Merge en mode Append (3 entrées) : attend les trois appels Ollama avant d'extraire."
+    },
+    {
+      "parameters": {
+        "jsCode": "// Récupère les trois réponses d'Ollama (une branche par prompt), retire les éventuelles clôtures Markdown\n// (```yara, ```yaml, ```json) que le modèle ajoute malgré la consigne, et écrit les règles dans /out/ia/.\n// Le rapport est un seul item : on lit l'item 0 de chaque branche (itemMatching(0) si plusieurs morceaux).\nconst fs = require('fs');\nconst acteur = $('Lire le rapport').first().json.acteur;\nconst dir = '/out/ia/';\nfs.mkdirSync(dir, { recursive: true });\nfunction nettoyer(s) {\n  s = String(s || '').trim();\n  s = s.replace(/^```[a-zA-Z]*\\s*\\n/, '').replace(/\\n```\\s*$/, '');\n  return s.trim() + '\\n';\n}\nconst yara = nettoyer($('Ollama YARA').first().json.response);\nconst sigma = nettoyer($('Ollama Sigma').first().json.response);\nlet attackRaw = nettoyer($('Ollama ATT&CK').first().json.response);\nlet attack;\ntry { attack = JSON.parse(attackRaw); } catch (e) { attack = { erreur: 'JSON invalide', brut: attackRaw }; }\n// Garde-fou : ne conserver que les identifiants présents dans la liste fermée de candidats (défense contre l'invention).\nconst candidats = fs.readFileSync('/prompts/candidats-attack.txt', 'utf8').split('\\n').map(l => l.split(' - ')[0].trim()).filter(Boolean);\nif (Array.isArray(attack.techniques)) {\n  attack.hors_liste = attack.techniques.filter(t => !candidats.includes(String(t.id || '').toUpperCase()));\n  attack.techniques = attack.techniques.filter(t => candidats.includes(String(t.id || '').toUpperCase()));\n}\nconst fYara = dir + acteur + '-ia.yar', fSigma = dir + acteur + '-ia.yml', fAttack = dir + 'attack-ia.json';\nfs.writeFileSync(fYara, yara);\nfs.writeFileSync(fSigma, sigma);\nfs.writeFileSync(fAttack, JSON.stringify(attack, null, 2) + '\\n');\nconst lat = n => Math.round(($(n).first().json.total_duration || 0) / 1e6);\nreturn [{ json: {\n  acteur, fichiers: [fYara, fSigma, fAttack],\n  modele: $('Ollama YARA').first().json.model,\n  latence_ms: { yara: lat('Ollama YARA'), sigma: lat('Ollama Sigma'), attack: lat('Ollama ATT&CK') },\n  n_techniques: Array.isArray(attack.techniques) ? attack.techniques.length : 0,\n  n_hors_liste: Array.isArray(attack.hors_liste) ? attack.hors_liste.length : 0,\n  yara_apercu: yara.slice(0, 300), sigma_apercu: sigma.slice(0, 300)\n} }];"
+      },
+      "name": "Extraire les règles",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Journal des générations, pour le livrable comparatif-humain-ia.md (une ligne JSON par exécution).\n// À faire ensuite à la main (TP 3, B2) : yara -r out/ia/<acteur>-ia.yar data/samples/ ; sigma-test.py out/ia/<acteur>-ia.yml …\nconst fs = require('fs');\nfor (const item of $input.all()) {\n  fs.appendFileSync('/out/ia/generations.jsonl', JSON.stringify({ ts: new Date().toISOString(), ...item.json }) + '\\n');\n}\nreturn $input.all();"
+      },
+      "name": "Journal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Exécution manuelle (TP 3)": {
+      "main": [
+        [
+          {
+            "node": "Lire le rapport",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire le rapport": {
+      "main": [
+        [
+          {
+            "node": "Ollama YARA",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Ollama Sigma",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Ollama ATT&CK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama YARA": {
+      "main": [
+        [
+          {
+            "node": "Attendre les 3 réponses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Sigma": {
+      "main": [
+        [
+          {
+            "node": "Attendre les 3 réponses",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Ollama ATT&CK": {
+      "main": [
+        [
+          {
+            "node": "Attendre les 3 réponses",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Attendre les 3 réponses": {
+      "main": [
+        [
+          {
+            "node": "Extraire les règles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraire les règles": {
+      "main": [
+        [
+          {
+            "node": "Journal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": [
+    {
+      "name": "IT320"
+    }
+  ]
+}

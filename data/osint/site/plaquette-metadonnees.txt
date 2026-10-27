@@ -1,0 +1,11 @@
+$ exiftool plaquette.pdf
+File Name                       : plaquette.pdf
+File Size                       : 2.1 MB
+PDF Version                     : 1.7
+Creator                         : Adobe InDesign 18.5 (Windows)
+Producer                        : Adobe PDF Library 17.0
+Author                          : k.benali
+Title                           : Plaquette PME Fictive 2023
+Create Date                     : 2023:04:11 10:42:17+02:00
+Modify Date                     : 2023:04:12 09:03:40+02:00
+Subject                         : D:\Partage\Communication\plaquette-2023-v3.indd

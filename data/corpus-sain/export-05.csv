@@ -1,0 +1,10 @@
+date;poste;utilisateur;commande
+2026-03-05;PC-047;user3;build 0417
+2026-03-24;PC-017;user11;v2.3
+2026-03-23;PC-060;user2;HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+2026-03-09;PC-003;user31;cmd.exe /c
+2026-03-23;PC-029;user1;powershell.exe
+2026-03-27;PC-052;user37;cmd.exe /c
+2026-03-17;PC-009;user27;v2.3
+2026-03-15;PC-050;user32;Mozilla/5.0 (Windows NT 10.0; Win64; x64)
+2026-03-07;PC-036;user32;Software\Microsoft

@@ -1,0 +1,40 @@
+{
+  "summary": "NordVault Systems a publié le 13 janvier 2026 un avis sur deux vulnérabilités des boîtiers SecureGate SSL-VPN 7.0.0 à 7.2.3 permettant un contournement d'authentification puis une exécution de code à distance. Des tentatives d'exploitation sont observées et les boîtiers compromis déposent un webshell. Le CERT-FR recommande la version 7.2.4 et la recherche des indicateurs depuis le 1er janvier 2026.",
+  "products": [
+    "NordVault SecureGate SSL-VPN versions 7.0.0 à 7.2.3"
+  ],
+  "cve": [
+    "CVE-2026-10231",
+    "CVE-2026-10232"
+  ],
+  "ioc": [
+    {
+      "type": "ip",
+      "value": "203.0.113.45"
+    },
+    {
+      "type": "ip",
+      "value": "198.51.100.212"
+    },
+    {
+      "type": "domain",
+      "value": "vpn-update.example"
+    },
+    {
+      "type": "sha256",
+      "value": "66535af8c518f2da2b0ec724c1673889c8195cfb5dd8153aef7ea7b69d8d8ed4"
+    }
+  ],
+  "attack_tactics": [
+    "TA0001"
+  ],
+  "attack_techniques": [
+    {
+      "id": "T1190",
+      "name": "Exploit Public-Facing Application"
+    }
+  ],
+  "tlp": "clear",
+  "severity": "critical",
+  "suspicious_instructions": []
+}

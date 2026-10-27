@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<item>
+  <title>CERTFR-2026-ALE-004 : Multiples vulnérabilités dans NordVault SecureGate SSL-VPN (fictif, exercice IT320)</title>
+  <link>https://www.cert.ssi.gouv.fr/alerte/CERTFR-2026-ALE-004/</link>
+  <pubDate>2026-01-14T10:00:00+01:00</pubDate>
+  <description>
+    Le 13 janvier 2026, l'éditeur NordVault Systems a publié un avis concernant deux vulnérabilités affectant les boîtiers
+    NordVault SecureGate SSL-VPN versions 7.0.0 à 7.2.3. La vulnérabilité CVE-2026-10231 permet à un attaquant non authentifié
+    de contourner l'authentification du portail d'administration ; la vulnérabilité CVE-2026-10232 permet ensuite une exécution
+    de code arbitraire à distance avec les privilèges du service. L'enchaînement des deux correspond à une exploitation d'application
+    exposée (MITRE ATT&CK T1190).
+
+    Le CERT-FR a connaissance de tentatives d'exploitation depuis les adresses 203.0.113.45 et 198.51.100.212. Les boîtiers compromis
+    contactent le domaine vpn-update.example et déposent un webshell dont l'empreinte SHA-256 est
+    66535af8c518f2da2b0ec724c1673889c8195cfb5dd8153aef7ea7b69d8d8ed4.
+
+    Le CERT-FR recommande d'appliquer sans délai la version 7.2.4, de rechercher les indicateurs ci-dessus dans les journaux depuis le
+    1er janvier 2026 et de renouveler les secrets stockés sur l'équipement en cas de compromission. Diffusion : TLP:CLEAR.
+  </description>
+</item>

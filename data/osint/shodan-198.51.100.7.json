@@ -1,0 +1,47 @@
+{
+ "ip_str": "198.51.100.7",
+ "org": "Hebergeur Fictif SAS",
+ "asn": "AS64496",
+ "country_code": "FR",
+ "city": "Bordeaux",
+ "last_update": "2026-10-03T00:00:00",
+ "hostnames": [
+  "dev-old.pme-fictive.example"
+ ],
+ "ports": [
+  80,
+  22
+ ],
+ "data": [
+  {
+   "port": 80,
+   "transport": "tcp",
+   "product": "Apache httpd",
+   "version": "2.4.49",
+   "http": {
+    "title": "Index of /",
+    "server": "Apache/2.4.49 (Unix)",
+    "robots": "User-agent: *\nDisallow: /backup/\nDisallow: /admin/\nDisallow: /old-site/\n"
+   },
+   "vulns": {
+    "CVE-2021-41773": {
+     "cvss": 7.5,
+     "summary": "Path traversal and file disclosure in Apache HTTP Server 2.4.49",
+     "verified": false
+    },
+    "CVE-2021-42013": {
+     "cvss": 9.8,
+     "summary": "Path traversal fix bypass in 2.4.49 and 2.4.50",
+     "verified": false
+    }
+   }
+  },
+  {
+   "port": 22,
+   "transport": "tcp",
+   "product": "OpenSSH",
+   "version": "7.6p1 Ubuntu-4ubuntu0.7",
+   "data": "SSH-2.0-OpenSSH_7.6p1 Ubuntu-4ubuntu0.7\n"
+  }
+ ]
+}

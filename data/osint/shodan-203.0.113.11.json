@@ -1,0 +1,44 @@
+{
+ "ip_str": "203.0.113.11",
+ "org": "Hebergeur Fictif SAS",
+ "asn": "AS64496",
+ "country_code": "FR",
+ "city": "Bordeaux",
+ "last_update": "2026-10-11T00:00:00",
+ "hostnames": [
+  "mail.pme-fictive.example"
+ ],
+ "ports": [
+  25,
+  443,
+  587,
+  993
+ ],
+ "data": [
+  {
+   "port": 25,
+   "transport": "tcp",
+   "product": "Postfix smtpd",
+   "data": "220 mail.pme-fictive.example ESMTP Postfix\n"
+  },
+  {
+   "port": 443,
+   "transport": "tcp",
+   "product": "nginx",
+   "http": {
+    "title": "Zimbra Web Client Sign In",
+    "server": "nginx"
+   }
+  },
+  {
+   "port": 587,
+   "transport": "tcp",
+   "product": "Postfix smtpd"
+  },
+  {
+   "port": 993,
+   "transport": "tcp",
+   "product": "Dovecot imapd"
+  }
+ ]
+}

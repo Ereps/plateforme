@@ -1,0 +1,24 @@
+title: SILEX-7 PowerShell encode avec fenetre cachee (genere par LLM, a valider)
+id: 3f6d2c1e-9b7a-4e55-8c21-5a1d0e9b7c33
+status: experimental
+description: Detecte l'execution de PowerShell avec une commande encodee et une fenetre cachee, comme decrit dans le rapport SILEX-7.
+author: IT320-LLM
+date: 2026/11/10
+references:
+  - Rapport SILEX-7 / LoaderX (IT320, fictif)
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '\powershell.exe'
+    CommandLine|contains:
+      - '-enc'
+      - '-EncodedCommand'
+  condition: selection
+falsepositives:
+  - Scripts d'administration legitimes utilisant -EncodedCommand
+level: high
+tags:
+  - attack.execution
+  - attack.t1059.001
